@@ -2,9 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
+import uniqid from 'uniqid';
+import AgoraRTM from 'agora-rtm-sdk';
+import { AgoraRTCProvider, useJoin, useLocalCameraTrack, useLocalMicrophoneTrack, usePublish, useRTCClient, useRemoteAudioTracks, useRemoteUsers, RemoteUser, LocalVideoTrack } from "agora-rtc-react";
+import AgoraRTC from "agora-rtc-sdk-ng";
 
 export default function Home() {
 
+  let APP_ID = "3a0f0b0bb21f42ed980aaed0a029331e";
+  let token = null;
+  let uid = uniqid();
+  
+  let client;
+  let channel;
 
   const [userVideo, setUserVideo] = useState(false);
   const [secondUserVideo, setSecondUserVideo] = useState(false);
@@ -30,11 +40,34 @@ export default function Home() {
       ]
   };
 
+  let newMemberJoined = async (memberID) => {
+    console.log("A new user joined the channel:", memberID);
+  }
+
   useEffect( () => {
+
+    //issue in this code
+    client = AgoraRTM.createInstance(APP_ID);
+    client.login({uid, token});
+
+    //this will be done by getting the room id from the url 
+    channel = client.createChannel('main');
+    channel.join();
+
+    channel.on('MemberJoined', newMemberJoined);
+
+
+
 
     //RTC Peer connection is a constructor that gives various methods and also connects local to remote 
     let connection = new RTCPeerConnection(servers);
     // console.log(connection);
+
+    connection.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log('New ICE Candidate:', event.candidate);
+      }
+    };
 
 
     //adding tracks of the first user so that the second user can get the video and audio of the first user easily
@@ -57,13 +90,19 @@ export default function Home() {
       })
     }
 
-
     //creating an offer
-    let firstOffer = connection.createOffer();
+    let firstOffer = connection.createOffer()
+   
+      .then( offer => {
+        connection.setLocalDescription(firstOffer);
+        console.log("Offer:", offer);
+      } )
+      .catch( error => {
+        console.log( "error while logging the offer:", error ); 
+      } )
 
     //passing the offer to the local description of the established connection
-    connection.setLocalDescription(firstOffer);
-    console.log("Offer:", firstOffer);
+    
 
   }, [] )
 
@@ -92,7 +131,7 @@ export default function Home() {
 
         <button className=" my-8 h-9 w-32 text-white bg-purple-800 font-bold rounded-md" onClick={allowUserVideo}>First User</button>    
 
-        <button className=" my-8 h-9 w-32 text-white bg-purple-800 font-bold rounded-md" onClick={allowSecondUserVideo}>Second User</button>        
+        <button className=" my-3 h-9 w-32 text-white bg-purple-800 font-bold rounded-md" onClick={allowSecondUserVideo}>Second User</button>        
 
 
       </div>

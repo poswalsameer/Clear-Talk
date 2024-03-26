@@ -13,6 +13,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>{children}</body>
+      {/* <script src="AgoraRTC_N-4.20.2.js"></script> */}
     </html>
   );
 }

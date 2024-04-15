@@ -47,14 +47,14 @@ export default function Home() {
   useEffect( () => {
 
     //issue in this code
-    client = AgoraRTM.createInstance(APP_ID);
-    client.login({uid, token});
+    // client = AgoraRTM.createInstance(APP_ID);
+    // client.login({uid, token});
 
-    //this will be done by getting the room id from the url 
-    channel = client.createChannel('main');
-    channel.join();
+    // //this will be done by getting the room id from the url 
+    // channel = client.createChannel('main');
+    // channel.join();
 
-    channel.on('MemberJoined', newMemberJoined);
+    // channel.on('MemberJoined', newMemberJoined);
 
 
 
